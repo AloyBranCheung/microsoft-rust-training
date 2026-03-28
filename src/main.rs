@@ -1,56 +1,54 @@
 fn main() {
-    // Challenge: Write a function that takes a &str sentence and returns a
-    // HashMap<String, usize> of word frequencies (case-insensitive). In Python
-    // this is Counter(s.lower().split()). Translate it to Rust.
-
-    // My Solution:
-    use std::collections::HashMap;
-
-    let strings_sentence = "Hello world! Hello Rust. Hello everyone.";
-
-    fn word_freq(sentence: &str) -> HashMap<String, usize> {
-        let mut hash: HashMap<String, usize> = HashMap::new();
-
-        for word in sentence.split_whitespace() {
-            let lower = word.to_lowercase();
-            if !hash.contains_key(&lower) {
-                hash.insert(lower, 1);
-            } else {
-                *hash.get_mut(&lower).unwrap() += 1;
-            }
-        }
-        hash
+    enum Shape {
+        Circle(f64),
+        Rectangle(f64, f64),
+        Triangle(f64, f64),
     }
 
-    // Option 2:
-    // use std::collections::HashMap;
+    impl Shape {
+        fn area(&self) -> f64 {
+            match self {
+                Shape::Circle(radius) => std::f64::consts::PI * radius * radius,
+                Shape::Rectangle(width, height) => width * height,
+                Shape::Triangle(base, height) => (base * height) / 2.0,
+            }
+        }
+    }
 
-    // fn word_frequencies(s: &str) -> HashMap<String, usize> {
-    //     let mut map = HashMap::new();
+    let c = Shape::Circle(64.0);
+    let r = Shape::Rectangle(5.0, 4.0);
+    let t = Shape::Triangle(5.0, 2.0);
+    println!("c area: {:.2}", c.area());
+    println!("r area: {}", r.area());
+    println!("t area: {}", t.area());
 
-    //     for word in s.split_whitespace() {
-    //         let word = word.to_lowercase();
-
-    //         map.entry(word).and_modify(|count| *count += 1).or_insert(1);
+    // Solution
+    // use std::f64::consts::PI;
+    //
+    // enum Shape {
+    //     Circle(f64),
+    //     Rectangle(f64, f64),
+    //     Triangle(f64, f64),
+    // }
+    //
+    // impl Shape {
+    //     fn area(&self) -> f64 {
+    //         match self {
+    //             Shape::Circle(r) => PI * r * r,
+    //             Shape::Rectangle(w, h) => w * h,
+    //             Shape::Triangle(b, h) => 0.5 * b * h,
+    //         }
     //     }
-
-    //     map
     // }
-
-    // Option 3:
-    // let text = "the quick brown fox jumps over the lazy fox";
-    // fn word_frequencies(text: &str) -> HashMap<String, usize> {
-    //     let mut counts = HashMap::new();
-    //     for word in text.split_whitespace() {
-    //         let key = word.to_lowercase();
-    //         *counts.entry(key).or_insert(0) += 1;
+    //
+    // fn main() {
+    //     let shapes = [
+    //         Shape::Circle(5.0),
+    //         Shape::Rectangle(4.0, 6.0),
+    //         Shape::Triangle(3.0, 8.0),
+    //     ];
+    //     for shape in &shapes {
+    //         println!("Area: {:.2}", shape.area());
     //     }
-    //     counts
     // }
-    // let freq = word_frequencies(strings_sentence);
-    // for (word, count) in &freq {
-    //     println!("{}: {}", word, count);
-    // }
-
-    println!("{:?}", word_freq(strings_sentence));
 }
