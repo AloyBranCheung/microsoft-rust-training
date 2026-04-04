@@ -1,35 +1,51 @@
-// Challenge: The following code has 3 borrow checker errors. Identify each one and fix them without using .clone():
-fn main() {
-    let mut names = vec!["Alice".to_string(), "Bob".to_string()];
-    let first = &names[0];
-    names.push("Charlie".to_string());
-    println!("First: {first}");
+//  Exercise: Parse Config Value (click to expand)
 
-    let greeting = make_greeting(names[0]);
-    println!("{greeting}");
-}
+// Challenge: Write a function parse_port(s: &str) -> Result<u16, String> that:
 
-fn make_greeting(name: String) -> String {
-    format!("Hello, {name}!")
-}
-// Solution
-// Errors fixed:
+//     Rejects empty strings with error "empty input"
+//     Parses the string to u16, mapping the parse error to "invalid number: {original_error}"
+//     Rejects ports below 1024 with "port {n} is privileged"
 
-//     Immutable borrow + mutation: first borrows names, then push mutates it. Fix: use first before pushing.
-//     Move out of Vec: names[0] tries to move a String out of Vec (not allowed). Fix: borrow with &names[0].
-//     Function takes ownership: make_greeting(String) consumes the value. Fix: take &str instead.
+// Call it with "", "hello", "80", and "8080" and print the results.
+
+// My solution
+// fn parse_port(s: &str) -> Result<u16, String> {
+//     if s.is_empty() {
+//         return Err("empty input".to_string());
+//     }
+
+//     let port: u16 = s.parse().map_err(|e| format!("invalid number: {e}"))?;
+
+//     if port < 1024 {
+//         return Err(format!("port {port} is privileged"));
+//     }
+
+//     Ok(port)
+// }
 
 // fn main() {
-//     let mut names = vec!["Alice".to_string(), "Bob".to_string()];
-//     let first = &names[0];
-//     println!("First: {first}"); // Use borrow BEFORE mutating
-//     names.push("Charlie".to_string()); // Now safe — no live immutable borrow
-
-//     let greeting = make_greeting(&names[0]); // Pass reference, not owned
-//     println!("{greeting}");
+//     println!("{:?}", parse_port(""));
+//     println!("{:?}", parse_port("hello"));
+//     println!("{:?}", parse_port("80"));
+//     println!("{:?}", parse_port("8080"));
 // }
 
-// fn make_greeting(name: &str) -> String {
-//     // Accept &str, not String
-//     format!("Hello, {name}!")
-// }
+fn parse_port(s: &str) -> Result<u16, String> {
+    if s.is_empty() {
+        return Err("empty input".to_string());
+    }
+    let port: u16 = s.parse().map_err(|e| format!("invalid number: {e}"))?;
+    if port < 1024 {
+        return Err(format!("port {port} is privileged"));
+    }
+    Ok(port)
+}
+
+fn main() {
+    for input in ["", "hello", "80", "8080"] {
+        match parse_port(input) {
+            Ok(port) => println!("✅ {input} → {port}"),
+            Err(e) => println!("❌ {input:?} → {e}"),
+        }
+    }
+}
