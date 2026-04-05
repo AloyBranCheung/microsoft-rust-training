@@ -1,51 +1,85 @@
-//  Exercise: Parse Config Value (click to expand)
+fn summarize_string(s: &str) -> &str {
+    &s[..20.min(s.len())]
+}
 
-// Challenge: Write a function parse_port(s: &str) -> Result<u16, String> that:
+trait Summary {
+    fn summarize(&self) -> String {
+        String::from("(Read more...)")
+    }
+}
 
-//     Rejects empty strings with error "empty input"
-//     Parses the string to u16, mapping the parse error to "invalid number: {original_error}"
-//     Rejects ports below 1024 with "port {n} is privileged"
+struct Article {
+    title: String,
+    body: String,
+}
 
-// Call it with "", "hello", "80", and "8080" and print the results.
+struct Tweet {
+    username: String,
+    content: String,
+}
 
-// My solution
-// fn parse_port(s: &str) -> Result<u16, String> {
-//     if s.is_empty() {
-//         return Err("empty input".to_string());
+impl Summary for Article {
+    fn summarize(&self) -> String {
+        format!("{}: {}...", self.title, summarize_string(&self.body))
+    }
+}
+
+impl Summary for Tweet {
+    fn summarize(&self) -> String {
+        format!("{}: {}...", self.username, summarize_string(&self.content))
+    }
+}
+
+fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+fn main() {
+    let article = Article {
+        title: String::from("The Rust Programming Language"),
+        body: String::from("This is a book about Rust programming language."),
+    };
+    let tweet = Tweet {
+        username: String::from("rustlang"),
+        content: String::from("Rust is a systems programming language."),
+    };
+
+    notify(&article);
+    notify(&tweet);
+}
+
+// Solution
+// trait Summary {
+//     fn summarize(&self) -> String;
+// }
+
+// struct Article { title: String, body: String }
+// struct Tweet { username: String, content: String }
+
+// impl Summary for Article {
+//     fn summarize(&self) -> String {
+//         format!("{} — {}...", self.title, &self.body[..20.min(self.body.len())])
 //     }
+// }
 
-//     let port: u16 = s.parse().map_err(|e| format!("invalid number: {e}"))?;
-
-//     if port < 1024 {
-//         return Err(format!("port {port} is privileged"));
+// impl Summary for Tweet {
+//     fn summarize(&self) -> String {
+//         format!("@{}: {}", self.username, self.content)
 //     }
+// }
 
-//     Ok(port)
+// fn notify(item: &impl Summary) {
+//     println!("📢 {}", item.summarize());
 // }
 
 // fn main() {
-//     println!("{:?}", parse_port(""));
-//     println!("{:?}", parse_port("hello"));
-//     println!("{:?}", parse_port("80"));
-//     println!("{:?}", parse_port("8080"));
+//     let article = Article {
+//         title: "Rust is great".into(),
+//         body: "Here is why Rust beats Python for systems...".into(),
+//     };
+//     let tweet = Tweet {
+//         username: "rustacean".into(),
+//         content: "Just shipped my first crate!".into(),
+//     };
+//     notify(&article);
+//     notify(&tweet);
 // }
-
-fn parse_port(s: &str) -> Result<u16, String> {
-    if s.is_empty() {
-        return Err("empty input".to_string());
-    }
-    let port: u16 = s.parse().map_err(|e| format!("invalid number: {e}"))?;
-    if port < 1024 {
-        return Err(format!("port {port} is privileged"));
-    }
-    Ok(port)
-}
-
-fn main() {
-    for input in ["", "hello", "80", "8080"] {
-        match parse_port(input) {
-            Ok(port) => println!("✅ {input} → {port}"),
-            Err(e) => println!("❌ {input:?} → {e}"),
-        }
-    }
-}
