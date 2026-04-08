@@ -1,85 +1,116 @@
-fn summarize_string(s: &str) -> &str {
-    &s[..20.min(s.len())]
-}
+use std::fmt::Display;
 
-trait Summary {
-    fn summarize(&self) -> String {
-        String::from("(Read more...)")
+struct Celsius(f64);
+struct Fahrenheit(f64);
+struct Kelvin(f64);
+
+impl From<Celsius> for Fahrenheit {
+    fn from(c: Celsius) -> Self {
+        Fahrenheit(c.0 * 9.0 / 5.0 + 32.0)
     }
 }
 
-struct Article {
-    title: String,
-    body: String,
-}
-
-struct Tweet {
-    username: String,
-    content: String,
-}
-
-impl Summary for Article {
-    fn summarize(&self) -> String {
-        format!("{}: {}...", self.title, summarize_string(&self.body))
+impl From<Celsius> for Kelvin {
+    fn from(c: Celsius) -> Self {
+        Kelvin(c.0 + 273.15)
     }
 }
 
-impl Summary for Tweet {
-    fn summarize(&self) -> String {
-        format!("{}: {}...", self.username, summarize_string(&self.content))
+impl TryFrom<f64> for Kelvin {
+    type Error = String;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        if value < 0.0 {
+            // Kelvin cannot be negative scale starts at absolute zero
+            Err("Temperature cannot be negative".to_string())
+        } else {
+            Ok(Kelvin(value))
+        }
     }
 }
 
-fn notify(item: &impl Summary) {
-    println!("Breaking news! {}", item.summarize());
+impl Display for Celsius {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} °C", self.0)
+    }
 }
+
+impl Display for Fahrenheit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} °F", self.0)
+    }
+}
+
+impl Display for Kelvin {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} K", self.0)
+    }
+}
+
 fn main() {
-    let article = Article {
-        title: String::from("The Rust Programming Language"),
-        body: String::from("This is a book about Rust programming language."),
-    };
-    let tweet = Tweet {
-        username: String::from("rustlang"),
-        content: String::from("Rust is a systems programming language."),
-    };
+    let boiling = Celsius(100.0);
+    let f: Fahrenheit = Celsius(100.0).into();
+    let k: Kelvin = Celsius(100.0).into();
+    println!("{boiling} = {f} = {k}");
 
-    notify(&article);
-    notify(&tweet);
+    match Kelvin::try_from(-10.0) {
+        Ok(k) => println!("{k}"),
+        Err(e) => println!("Error: {e}"),
+    }
 }
 
-// Solution
-// trait Summary {
-//     fn summarize(&self) -> String;
-// }
+// // Solution
+// use std::fmt;
 
-// struct Article { title: String, body: String }
-// struct Tweet { username: String, content: String }
+// struct Celsius(f64);
+// struct Fahrenheit(f64);
+// struct Kelvin(f64);
 
-// impl Summary for Article {
-//     fn summarize(&self) -> String {
-//         format!("{} — {}...", self.title, &self.body[..20.min(self.body.len())])
+// impl From<Celsius> for Fahrenheit {
+//     fn from(c: Celsius) -> Self {
+//         Fahrenheit(c.0 * 9.0 / 5.0 + 32.0)
 //     }
 // }
 
-// impl Summary for Tweet {
-//     fn summarize(&self) -> String {
-//         format!("@{}: {}", self.username, self.content)
+// impl From<Celsius> for Kelvin {
+//     fn from(c: Celsius) -> Self {
+//         Kelvin(c.0 + 273.15)
 //     }
 // }
 
-// fn notify(item: &impl Summary) {
-//     println!("📢 {}", item.summarize());
+// #[derive(Debug)]
+// struct BelowAbsoluteZero;
+
+// impl fmt::Display for BelowAbsoluteZero {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         write!(f, "temperature below absolute zero")
+//     }
 // }
+
+// impl TryFrom<f64> for Kelvin {
+//     type Error = BelowAbsoluteZero;
+
+//     fn try_from(value: f64) -> Result<Self, Self::Error> {
+//         if value < 0.0 {
+//             Err(BelowAbsoluteZero)
+//         } else {
+//             Ok(Kelvin(value))
+//         }
+//     }
+// }
+
+// impl fmt::Display for Celsius    { fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { write!(f, "{:.2}°C", self.0) } }
+// impl fmt::Display for Fahrenheit { fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { write!(f, "{:.2}°F", self.0) } }
+// impl fmt::Display for Kelvin     { fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { write!(f, "{:.2}K",  self.0) } }
 
 // fn main() {
-//     let article = Article {
-//         title: "Rust is great".into(),
-//         body: "Here is why Rust beats Python for systems...".into(),
-//     };
-//     let tweet = Tweet {
-//         username: "rustacean".into(),
-//         content: "Just shipped my first crate!".into(),
-//     };
-//     notify(&article);
-//     notify(&tweet);
+//     let boiling = Celsius(100.0);
+//     let f: Fahrenheit = Celsius(100.0).into();
+//     let k: Kelvin = Celsius(100.0).into();
+//     println!("{boiling} = {f} = {k}");
+
+//     match Kelvin::try_from(-10.0) {
+//         Ok(k) => println!("{k}"),
+//         Err(e) => println!("Error: {e}"),
+//     }
 // }
